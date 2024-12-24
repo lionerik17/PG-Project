@@ -6,9 +6,6 @@
 #include <GL/glew.h>
 #endif
 
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -42,13 +39,12 @@ glm::vec3 lightColor;
 GLuint lightColorLoc;
 
 gps::Camera myCamera(
-	glm::vec3(10.0f, 5.0f, 10.0f),
-	glm::vec3(10.0f, 0.0f, -10.0f),
-	glm::vec3(0.0f, 5.0f, 0.0f));
+	glm::vec3(0.0f, 1.0f, 0.0f),
+	glm::vec3(0.0f, 1.0f, -1.0f),
+	glm::vec3(0.0f, 1.0f, 0.0f));
 float cameraSpeed = 0.75f;
 
 bool pressedKeys[1024];
-float angleY = 0.0f;
 
 gps::Model3D myModel;
 gps::Shader myCustomShader;
@@ -103,22 +99,6 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 
 void processMovement()
 {
-	/*if (pressedKeys[GLFW_KEY_Q]) {
-		angleY -= 1.0f;
-		model = glm::rotate(glm::mat4(1.0f), glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
-		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-	}
-
-	if (pressedKeys[GLFW_KEY_E]) {
-		angleY += 1.0f;
-		model = glm::rotate(glm::mat4(1.0f), glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
-		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-	}*/
-
 	if (pressedKeys[GLFW_KEY_W]) {
 		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
 		view = myCamera.getViewMatrix();
@@ -145,6 +125,38 @@ void processMovement()
 
 	if (pressedKeys[GLFW_KEY_D]) {
 		myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
+		view = myCamera.getViewMatrix();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+
+	if (pressedKeys[GLFW_KEY_UP]) {
+		myCamera.rotate(cameraSpeed, 0.0f);
+		view = myCamera.getViewMatrix();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+
+	if (pressedKeys[GLFW_KEY_DOWN]) {
+		myCamera.rotate(-cameraSpeed, 0.0f);
+		view = myCamera.getViewMatrix();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+
+	if (pressedKeys[GLFW_KEY_LEFT]) {
+		myCamera.rotate(0.0f, -cameraSpeed);
+		view = myCamera.getViewMatrix();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+
+	if (pressedKeys[GLFW_KEY_RIGHT]) {
+		myCamera.rotate(0.0f, cameraSpeed);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
@@ -220,7 +232,7 @@ void initShaders() {
 }
 
 void initUniforms() {
-	model = glm::scale(glm::mat4(1.0f), glm::vec3(0.07f, 0.07f, 0.07f)); // Scale down to 10%
+	model = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)); // Airport is MASSIVE
 	modelLoc = glGetUniformLocation(myCustomShader.shaderProgram, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 

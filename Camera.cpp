@@ -15,6 +15,10 @@ namespace gps {
         this->cameraRightDirection = glm::normalize(glm::cross(this->cameraFrontDirection, this->cameraUpDirection));
         // Recalculate up direction to ensure orthogonality
         this->cameraUpDirection = glm::normalize(glm::cross(this->cameraRightDirection, this->cameraFrontDirection));
+
+        // Initialize yaw and pitch
+        this->yaw = -90.0f;
+        this->pitch = 0.0f;
     }
 
     // Return the view matrix, using the glm::lookAt() function
@@ -38,6 +42,7 @@ namespace gps {
             cameraPosition -= cameraRightDirection * speed;
             break;
         }
+
         // Update the camera target based on the new position and front direction
         cameraTarget = cameraPosition + cameraFrontDirection;
     }
@@ -72,7 +77,7 @@ namespace gps {
         cameraFrontDirection = glm::normalize(front);
 
         // Recalculate the right and up vectors to maintain orthogonality
-        cameraRightDirection = glm::normalize(glm::cross(cameraFrontDirection, cameraUpDirection));
+        cameraRightDirection = glm::normalize(glm::cross(cameraFrontDirection, glm::vec3(0.0f, 1.0f, 0.0f)));
         cameraUpDirection = glm::normalize(glm::cross(cameraRightDirection, cameraFrontDirection));
     }
 }

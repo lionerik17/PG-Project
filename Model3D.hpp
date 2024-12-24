@@ -5,7 +5,6 @@
 
 #include "tiny_obj_loader.h"
 #include "stb_image.h"
-#include "tiny_gltf.h"
 
 #include <iostream>
 #include <string>
@@ -21,8 +20,6 @@ namespace gps {
 		void LoadModel(std::string fileName);
 
 		void LoadModel(std::string fileName, std::string basePath);
-
-		void LoadGLTF(std::string fileName);
 
 		void Draw(gps::Shader shaderProgram);
 
@@ -40,10 +37,6 @@ namespace gps {
 
 		// Reads the pixel data from an image file and loads it into the video memory
 		GLuint ReadTextureFromFile(const char* file_name);
-
-		void ProcessMesh(const tinygltf::Model& gltfModel, const tinygltf::Mesh& mesh, const glm::mat4& transform);
-
-		void ProcessNode(const tinygltf::Model& gltfModel, const tinygltf::Node& node, const glm::mat4& parentTransform);
     };
 }
 
