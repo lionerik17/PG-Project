@@ -2,6 +2,7 @@
 #define Model3D_hpp
 
 #include "Mesh.hpp"
+#include "BoundingBox.h"
 
 #include "tiny_obj_loader.h"
 #include "stb_image.h"
@@ -23,11 +24,14 @@ namespace gps {
 
 		void Draw(gps::Shader shaderProgram);
 
+		BoundingBox getBoundingBox() const;
+
     private:
 		// Component meshes - group of objects
         std::vector<gps::Mesh> meshes;
 		// Associated textures
         std::vector<gps::Texture> loadedTextures;
+		BoundingBox boundingBox; // Store the bounding box of the model
 
 		// Does the parsing of the .obj file and fills in the data structure
 		void ReadOBJ(std::string fileName, std::string basePath);

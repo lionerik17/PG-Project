@@ -26,6 +26,17 @@ namespace gps {
         return glm::lookAt(cameraPosition, cameraPosition + cameraFrontDirection, cameraUpDirection);
     }
 
+    glm::vec3 Camera::getPosition() const {
+        return cameraPosition;
+    }
+
+    void Camera::setPosition(const glm::vec3& position) {
+        cameraPosition = position;
+
+        // Update the camera target to maintain consistency
+        cameraTarget = cameraPosition + cameraFrontDirection;
+    }
+
     // Update the camera internal parameters following a camera move event
     void Camera::move(MOVE_DIRECTION direction, float speed) {
         switch (direction) {

@@ -32,6 +32,7 @@ glm::mat4 projection;
 GLuint projectionLoc;
 glm::mat3 normalMatrix;
 GLuint normalMatrixLoc;
+glm::vec3 ground;
 
 glm::vec3 lightDir;
 GLuint lightDirLoc;
@@ -44,9 +45,12 @@ gps::Camera myCamera(
 	glm::vec3(0.0f, 1.0f, 0.0f));
 float cameraSpeed = 0.75f;
 
+glm::vec3 cameraOffset(0.0f, 1.0f, 0.0f);
+
 bool pressedKeys[1024];
 
-gps::Model3D myModel;
+gps::Model3D airportModel;
+gps::BoundingBox airportBoundingBox;
 gps::Shader myCustomShader;
 glm::vec3 lightPos;
 GLuint lightPosLoc;
@@ -99,8 +103,17 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 
 void processMovement()
 {
+	glm::vec3 currentPosition = myCamera.getPosition();
+	glm::vec3 newPosition = currentPosition;
+
 	if (pressedKeys[GLFW_KEY_W]) {
 		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
+		newPosition = myCamera.getPosition();
+		if (newPosition.y < ground.y) {
+			std::cout << "noclip\n";
+			currentPosition.y += 0.1f;
+			myCamera.setPosition(currentPosition);
+		}
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
@@ -223,7 +236,8 @@ void initOpenGLState()
 }
 
 void initObjects() {
-	myModel.LoadModel("objects/airport/airport.obj", "objects/airport/");
+	airportModel.LoadModel("objects/airport/airport.obj", "objects/airport/");
+	airportBoundingBox = airportModel.getBoundingBox();
 }
 
 void initShaders() {
@@ -233,6 +247,8 @@ void initShaders() {
 
 void initUniforms() {
 	model = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)); // Airport is MASSIVE
+	airportBoundingBox.transform(model);
+	ground = airportBoundingBox.getMin() + cameraOffset;
 	modelLoc = glGetUniformLocation(myCustomShader.shaderProgram, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -268,7 +284,7 @@ void initUniforms() {
 
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	myModel.Draw(myCustomShader);
+	airportModel.Draw(myCustomShader);
 }
 
 void cleanup() {
