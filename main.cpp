@@ -24,8 +24,8 @@ int glWindowHeight = 600;
 int retina_width, retina_height;
 GLFWwindow* glWindow = NULL;
 
-glm::mat4 model;
-GLuint modelLoc;
+glm::mat4 airportModelMatrix;
+GLuint airportModelLoc;
 glm::mat4 view;
 GLuint viewLoc;
 glm::mat4 projection;
@@ -33,6 +33,9 @@ GLuint projectionLoc;
 glm::mat3 normalMatrix;
 GLuint normalMatrixLoc;
 glm::vec3 ground;
+
+glm::mat4 airplaneModelMatrix;
+GLuint airplaneModelLoc;
 
 glm::vec3 lightDir;
 GLuint lightDirLoc;
@@ -52,6 +55,11 @@ bool pressedKeys[1024];
 gps::Model3D airportModel;
 gps::BoundingBox airportBoundingBox;
 gps::Shader myCustomShader;
+
+gps::Model3D airplaneModel;
+gps::BoundingBox airplaneBoundingBox;
+GLuint objectIDLoc;
+
 glm::vec3 lightPos;
 GLuint lightPosLoc;
 
@@ -80,6 +88,10 @@ GLenum glCheckError_(const char* file, int line) {
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
 
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
+	if (width == 0 || height == 0) {
+		return;
+	}
+
 	glWindowWidth = width;
 	glWindowHeight = height;
 	glfwGetFramebufferSize(window, &retina_width, &retina_height);
@@ -109,6 +121,7 @@ void processMovement()
 	if (pressedKeys[GLFW_KEY_W]) {
 		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
 		newPosition = myCamera.getPosition();
+		std::cout << myCamera.getPosition().x << " " << myCamera.getPosition().z << '\n';
 		if (newPosition.y < ground.y) {
 			std::cout << "noclip\n";
 			currentPosition.y += 0.1f;
@@ -116,7 +129,7 @@ void processMovement()
 		}
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
@@ -124,7 +137,7 @@ void processMovement()
 		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
@@ -132,7 +145,7 @@ void processMovement()
 		myCamera.move(gps::MOVE_LEFT, cameraSpeed);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
@@ -140,7 +153,7 @@ void processMovement()
 		myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
@@ -148,7 +161,7 @@ void processMovement()
 		myCamera.rotate(cameraSpeed, 0.0f);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
@@ -156,7 +169,7 @@ void processMovement()
 		myCamera.rotate(-cameraSpeed, 0.0f);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
@@ -164,7 +177,7 @@ void processMovement()
 		myCamera.rotate(0.0f, -cameraSpeed);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
@@ -172,7 +185,7 @@ void processMovement()
 		myCamera.rotate(0.0f, cameraSpeed);
 		view = myCamera.getViewMatrix();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 }
@@ -238,6 +251,9 @@ void initOpenGLState()
 void initObjects() {
 	airportModel.LoadModel("objects/airport/airport.obj", "objects/airport/");
 	airportBoundingBox = airportModel.getBoundingBox();
+
+	airplaneModel.LoadModel("objects/airplane/airplane.obj", "objects/airplane/");
+	airplaneBoundingBox = airplaneModel.getBoundingBox();
 }
 
 void initShaders() {
@@ -246,19 +262,25 @@ void initShaders() {
 }
 
 void initUniforms() {
-	model = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)); // Airport is MASSIVE
-	airportBoundingBox.transform(model);
+	objectIDLoc = glGetUniformLocation(myCustomShader.shaderProgram, "objectID");
+	normalMatrixLoc = glGetUniformLocation(myCustomShader.shaderProgram, "normalMatrix");
+
+	airportModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)); // Airport is MASSIVE
+	airportBoundingBox.transform(airportModelMatrix);
+	airportModelLoc = glGetUniformLocation(myCustomShader.shaderProgram, "airportModel");
+	glUniformMatrix4fv(airportModelLoc, 1, GL_FALSE, glm::value_ptr(airportModelMatrix));
 	ground = airportBoundingBox.getMin() + cameraOffset;
-	modelLoc = glGetUniformLocation(myCustomShader.shaderProgram, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+	airplaneModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 5.0f, -10.0f));
+	airplaneModelMatrix = glm::scale(airplaneModelMatrix, glm::vec3(0.1f, 0.1f, 0.1f));
+	airplaneModelMatrix = glm::rotate(airplaneModelMatrix, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	airplaneBoundingBox.transform(airplaneModelMatrix);
+	airplaneModelLoc = glGetUniformLocation(myCustomShader.shaderProgram, "airplaneModel");
+	glUniformMatrix4fv(airplaneModelLoc, 1, GL_FALSE, glm::value_ptr(airplaneModelMatrix));
 
 	view = myCamera.getViewMatrix();
 	viewLoc = glGetUniformLocation(myCustomShader.shaderProgram, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-	normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
-	normalMatrixLoc = glGetUniformLocation(myCustomShader.shaderProgram, "normalMatrix");
-	glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
 	projection = glm::perspective(glm::radians(45.0f), (float)retina_width / (float)retina_height, 0.1f, 1000.0f);
 	projectionLoc = glGetUniformLocation(myCustomShader.shaderProgram, "projection");
@@ -284,7 +306,15 @@ void initUniforms() {
 
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUniform1i(objectIDLoc, 0); // Set objectID to 0 for airport
+	normalMatrix = glm::mat3(glm::inverseTranspose(view * airportModelMatrix));
+	glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	airportModel.Draw(myCustomShader);
+
+	glUniform1i(objectIDLoc, 1); // Set objectID to 1 for airplane
+	normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
+	glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	airplaneModel.Draw(myCustomShader);
 }
 
 void cleanup() {
