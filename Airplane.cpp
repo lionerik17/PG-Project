@@ -33,6 +33,8 @@ private:
         else {
             speed = 0.0f;
         }
+        velocity.x *= drag;
+        velocity.z *= drag;
     }
 
 public:
@@ -96,6 +98,10 @@ public:
 
     glm::vec3 getPosition() const {
         return position;
+    }
+
+    glm::vec3 getForwardDirection() const {
+        return forwardDirection;
     }
 
     float getSpeed() const {

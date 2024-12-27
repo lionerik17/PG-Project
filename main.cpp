@@ -119,14 +119,15 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 }
 
 void updateCameraPosition() {
-	/// TODO: Call this function at any time
 	glm::vec3 airplanePosition = airplane.getPosition();
-	glm::vec3 forwardDirection = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::vec3 forwardDirection = airplane.getForwardDirection();
 
 	glm::vec3 newCameraPosition = airplanePosition - (forwardDirection * cameraOffset.z) + glm::vec3(0.0f, cameraOffset.y, 0.0f);
 
 	myCamera.setPosition(newCameraPosition);
 	myCamera.setTarget(airplanePosition);
+	view = myCamera.getViewMatrix();
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 }
 
 void processMovement()
@@ -372,7 +373,6 @@ int main(int argc, const char* argv[]) {
 	initObjects();
 	initShaders();
 	initUniforms();
-	updateCameraPosition();
 
 	while (!glfwWindowShouldClose(glWindow)) {
 		airplane.applyGravity();
