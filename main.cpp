@@ -119,24 +119,25 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 }
 
 void updateCameraPosition() {
+	/// TODO: Call this function at any time
 	glm::vec3 airplanePosition = airplane.getPosition();
 	glm::vec3 forwardDirection = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f));
 
-	glm::vec3 newCameraPosition = airplanePosition + forwardDirection * (-cameraOffset.z) + glm::vec3(0.0f, cameraOffset.y, 0.0f);
+	glm::vec3 newCameraPosition = airplanePosition - (forwardDirection * cameraOffset.z) + glm::vec3(0.0f, cameraOffset.y, 0.0f);
 
 	myCamera.setPosition(newCameraPosition);
 	myCamera.setTarget(airplanePosition);
 }
 
-
 void processMovement()
 {
 	glm::vec3 currentPosition = myCamera.getPosition();
 	glm::vec3 newPosition = currentPosition;
+	std::cout << airplane.getSpeed() << "\n";
 
 	if (pressedKeys[GLFW_KEY_W]) {
 		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
-		airplane.moveForward(airplaneSpeed);
+		airplane.moveForward(true);
 		newPosition = myCamera.getPosition();
 		if (newPosition.y < ground.y) {
 			currentPosition.y += 0.1f;
@@ -146,7 +147,9 @@ void processMovement()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-		updateCameraPosition();
+	}
+	else {
+		airplane.moveForward(false);
 	}
 
 	if (pressedKeys[GLFW_KEY_S]) {
@@ -161,7 +164,6 @@ void processMovement()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-		updateCameraPosition();
 	}
 
 	if (pressedKeys[GLFW_KEY_A]) {
@@ -222,7 +224,6 @@ void processMovement()
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 
-	airplane.applyGravity();
 	airplane.updateShader();
 }
 
@@ -371,8 +372,11 @@ int main(int argc, const char* argv[]) {
 	initObjects();
 	initShaders();
 	initUniforms();
+	updateCameraPosition();
 
 	while (!glfwWindowShouldClose(glWindow)) {
+		airplane.applyGravity();
+		updateCameraPosition();
 		processMovement();
 		renderScene();
 
