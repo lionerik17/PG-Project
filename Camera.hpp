@@ -20,6 +20,7 @@ namespace gps {
         glm::vec3 getPosition() const;
         void setPosition(const glm::vec3& position);
         //update the camera internal parameters following a camera move event
+        void setTarget(const glm::vec3& target);
         void move(MOVE_DIRECTION direction, float speed);
         //update the camera internal parameters following a camera rotate event
         //yaw - camera rotation around the y axis

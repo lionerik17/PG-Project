@@ -13,7 +13,7 @@ private:
     float deltaTime = 0.016f;
 
 public:
-    Airplane(glm::vec3 startPosition, glm::mat4 initialModelMatrix, GLuint shaderModelLoc, float groundY = 0.0f, float gravityAccel = -9.8f)
+    Airplane(glm::vec3 startPosition, glm::mat4 initialModelMatrix, GLuint shaderModelLoc, float groundY = 3.0f, float gravityAccel = -9.8f)
         : position(startPosition), velocity(0.0f), gravity(gravityAccel), modelMatrix(initialModelMatrix),
         modelMatrixLoc(shaderModelLoc), groundLevel(groundY) {}
 
@@ -27,9 +27,14 @@ public:
             velocity.y = 0.0f;
         }
 
+        updateModelMatrix();
+    }
+
+    void updateModelMatrix() {
         modelMatrix = glm::translate(glm::mat4(1.0f), position);
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f, 0.1f, 0.1f));
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0f, 2.0f, 2.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     }
 
     void updateShader() const {
