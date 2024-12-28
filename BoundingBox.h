@@ -5,27 +5,40 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
-namespace gps {
+#include <glm/glm.hpp>
+#include <iostream>
 
-    class BoundingBox {
-    public:
-        BoundingBox();
-        BoundingBox(const glm::vec3& min, const glm::vec3& max);
+class BoundingBox {
+public:
+    glm::vec3 min;
+    glm::vec3 max;
 
-        void calculate(const std::vector<glm::vec3>& vertices);
-        void transform(const glm::mat4& modelMatrix);
-        bool isColliding(const BoundingBox& other) const;
+    // Default constructor
+    BoundingBox();
 
-        glm::vec3 getMin() const;
-        glm::vec3 getMax() const;
-        std::vector<glm::vec3> getCorners() const;
-        void setMin(const glm::vec3& newMin);
-        void setMax(const glm::vec3& newMax);
-    private:
-        glm::vec3 min;
-        glm::vec3 max;
-    };
+    // Constructor with specified corners
+    BoundingBox(const glm::vec3& minCorner, const glm::vec3& maxCorner);
 
-} // namespace gps
+    // Check if this bounding box intersects with another
+    bool intersects(const BoundingBox& otherBox) const;
+
+    // Translate the bounding box by a given vector
+    void translate(const glm::vec3& translation);
+
+    BoundingBox transform(const glm::mat4& modelMatrix) const;
+
+    // Expand the bounding box by a given scale
+    void scale(const glm::vec3& scale);
+
+    // Debugging function to print the bounding box values
+    void print() const;
+private:
+    std::vector<glm::vec3> getTransformedCorners(const glm::mat4& transform) const;
+
+
+    std::vector<glm::vec3> getSeparatingAxes(const std::vector<glm::vec3>& thisCorners, const std::vector<glm::vec3>& otherCorners) const;
+
+    bool overlapOnAxis(const std::vector<glm::vec3>& thisCorners, const std::vector<glm::vec3>& otherCorners, const glm::vec3& axis) const;
+};
 
 #endif // BOUNDINGBOX_H

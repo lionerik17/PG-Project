@@ -56,13 +56,13 @@ glm::vec3 cameraOffset(0.0f, 5.0f, 20.0f);
 bool pressedKeys[1024];
 
 gps::Model3D airportModel;
-gps::BoundingBox airportBoundingBox;
+BoundingBox airportBoundingBox;
 glm::vec3 airplanePosition(0.0f, 6.0f, -60.0f);
-Airplane airplane(airplanePosition, glm::mat4(1.0f), 0, gps::BoundingBox());
+Airplane airplane(airplanePosition, glm::mat4(1.0f), 0, BoundingBox());
 gps::Shader myCustomShader;
 
 gps::Model3D airplaneModel;
-gps::BoundingBox airplaneBoundingBox;
+BoundingBox airplaneBoundingBox;
 GLuint objectIDLoc;
 
 glm::vec3 lightPos;
@@ -135,7 +135,10 @@ void processMovement()
 {
 	glm::vec3 currentPosition = myCamera.getPosition();
 	glm::vec3 newPosition = currentPosition;
-	//std::cout << airplane.getSpeed() << "\n";
+	std::cout << airplane.getBoundingBox().min.y + airportBoundingBox.min.y << '\n';
+	if (airplane.getBoundingBox().intersects(airportBoundingBox)) {
+		std::cout << "teapa fraiere\n";
+	}
 
 	if (pressedKeys[GLFW_KEY_W]) {
 		airplane.moveForward(true);
@@ -299,6 +302,7 @@ void initUniforms() {
 
 	airportModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.25f, 0.25f, 0.25f)); // Airport is MASSIVE
 	airportModelLoc = glGetUniformLocation(myCustomShader.shaderProgram, "airportModel");
+	airportBoundingBox = airportBoundingBox.transform(airportModelMatrix);
 	glUniformMatrix4fv(airportModelLoc, 1, GL_FALSE, glm::value_ptr(airportModelMatrix));
 
 	airplaneModelMatrix = glm::translate(glm::mat4(1.0f), airplanePosition);
@@ -306,6 +310,7 @@ void initUniforms() {
 	airplaneModelMatrix = glm::rotate(airplaneModelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	airplaneModelMatrix = glm::rotate(airplaneModelMatrix, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	airplaneModelLoc = glGetUniformLocation(myCustomShader.shaderProgram, "airplaneModel");
+	airplaneBoundingBox = airplaneBoundingBox.transform(airplaneModelMatrix);
 	glUniformMatrix4fv(airplaneModelLoc, 1, GL_FALSE, glm::value_ptr(airplaneModelMatrix));
 
 	airplane = Airplane(airplanePosition, airplaneModelMatrix, airplaneModelLoc, airplaneBoundingBox);

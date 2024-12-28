@@ -6,11 +6,14 @@ namespace gps {
 
         std::string basePath = fileName.substr(0, fileName.find_last_of('/')) + "/";
 		std::cout << basePath << '\n';
+		boundingBox = BoundingBox(glm::vec3(std::numeric_limits<float>::max()),
+			glm::vec3(std::numeric_limits<float>::lowest()));
 		ReadOBJ(fileName, basePath);
 	}
 
     void Model3D::LoadModel(std::string fileName, std::string basePath)	{
-
+		boundingBox = BoundingBox(glm::vec3(std::numeric_limits<float>::max()),
+			glm::vec3(std::numeric_limits<float>::lowest()));
 		ReadOBJ(fileName, basePath);
 	}
 
@@ -20,7 +23,7 @@ namespace gps {
 			meshes[i].Draw(shaderProgram);
 	}
 
-	gps::BoundingBox gps::Model3D::getBoundingBox() const {
+	BoundingBox gps::Model3D::getBoundingBox() const {
 		return boundingBox;
 	}
 
@@ -95,6 +98,15 @@ namespace gps {
 					currentVertex.Position = vertexPosition;
 					currentVertex.Normal = vertexNormal;
 					currentVertex.TexCoords = vertexTexCoords;
+
+					// Update the bounding box with this vertex
+					boundingBox.min.x = std::min(boundingBox.min.x, vertexPosition.x);
+					boundingBox.min.y = std::min(boundingBox.min.y, vertexPosition.y);
+					boundingBox.min.z = std::min(boundingBox.min.z, vertexPosition.z);
+
+					boundingBox.max.x = std::max(boundingBox.max.x, vertexPosition.x);
+					boundingBox.max.y = std::max(boundingBox.max.y, vertexPosition.y);
+					boundingBox.max.z = std::max(boundingBox.max.z, vertexPosition.z);
 
 					vertices.push_back(currentVertex);
 
