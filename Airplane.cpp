@@ -25,18 +25,19 @@ private:
     float yaw = 0.0f;
     float pitch = 0.0f;
     float roll = 0.0f;
-    float bankingSpeed = 30.0f;
-    float maxBankingAngle = 30.0f;
+    float bankingSpeed = 15.0f;
+    float maxBankingAngle = 15.0f;
+    float maxYawAngle = 15.0f;
     BoundingBox originalBoundingBox;
 
     void accelerate() {
-        if (speed >= maxSpeed) speed = maxSpeed;
         speed += acceleration * deltaTime;
+        speed = glm::clamp(speed, -maxSpeed, maxSpeed);
     }
 
     void decelerate() {
-        if (speed <= -maxSpeed) speed = -maxSpeed;
         speed -= acceleration * deltaTime;
+        speed = glm::clamp(speed, -maxSpeed, maxSpeed);
     }
 
     void applyDrag() {
@@ -95,15 +96,20 @@ public:
         if (roll > maxBankingAngle) roll = maxBankingAngle;
 
         yaw -= bankingSpeed * deltaTime;
+        yaw = glm::clamp(yaw, -maxYawAngle, maxYawAngle);
+        std::cout << "Yaw: " << yaw << " degrees\n"; // Debug output
         updateOrientation();
         updateModelMatrix();
     }
 
     void turnRight() {
         roll -= bankingSpeed * deltaTime;
-        if (roll > maxBankingAngle) roll = maxBankingAngle;
+        if (roll < -maxBankingAngle) roll = -maxBankingAngle;
 
         yaw += bankingSpeed * deltaTime;
+        yaw = glm::clamp(yaw, -maxYawAngle, maxYawAngle);
+        std::cout << "Yaw: " << yaw << " degrees\n"; // Debug output
+        //if (yaw < -bankingSpeed) yaw = -bankingSpeed;
         updateOrientation();
         updateModelMatrix();
     }
@@ -118,6 +124,20 @@ public:
             if (roll > 0.0f) roll = 0.0f;
         }
         
+        updateOrientation();
+        updateModelMatrix();
+    }
+
+    void levelYaw() {
+        if (yaw > 0.0f) {
+            yaw -= bankingSpeed * deltaTime;
+            if (yaw < 0.0f) yaw = 0.0f;
+        }
+        else if (yaw < 0.0f) {
+            yaw += bankingSpeed * deltaTime;
+            if (yaw > 0.0f) yaw = 0.0f;
+        }
+
         updateOrientation();
         updateModelMatrix();
     }

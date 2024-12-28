@@ -135,8 +135,8 @@ void processMovement()
 {
 	glm::vec3 currentPosition = myCamera.getPosition();
 	glm::vec3 newPosition = currentPosition;
-	std::cout << airplane.getBoundingBox().min.y + airportBoundingBox.min.y << '\n';
-	if (airplane.getBoundingBox().intersects(airportBoundingBox)) {
+	//std::cout << airplane.getBoundingBox().min.y + airportBoundingBox.min.y << '\n';
+	if (airplane.getBoundingBox().intersects(airportBoundingBox) || airplane.getPosition().y <= 3.0f) {
 		std::cout << "teapa fraiere\n";
 	}
 
@@ -187,6 +187,10 @@ void processMovement()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+	else {
+		airplane.levelRoll();
+		airplane.levelYaw();
 	}
 	
 
