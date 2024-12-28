@@ -30,6 +30,14 @@ namespace gps {
         return cameraPosition;
     }
 
+    float Camera::getPitch() const {
+        return pitch;
+    }
+
+    float Camera::getYaw() const {
+        return yaw;
+    }
+
     void Camera::setPosition(const glm::vec3& position) {
         cameraPosition = position;
 

@@ -14,10 +14,11 @@ namespace gps {
 
         void calculate(const std::vector<glm::vec3>& vertices);
         void transform(const glm::mat4& modelMatrix);
-        bool isColliding(const glm::vec3& point) const;
+        bool isColliding(const BoundingBox& other) const;
 
         glm::vec3 getMin() const;
         glm::vec3 getMax() const;
+        std::vector<glm::vec3> getCorners() const;
         void setMin(const glm::vec3& newMin);
         void setMax(const glm::vec3& newMax);
     private:

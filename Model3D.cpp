@@ -1,5 +1,4 @@
 #include "Model3D.hpp"
-#include "BoundingBox.h"
 
 namespace gps {
 
@@ -81,9 +80,6 @@ namespace gps {
 					float nz = attrib.normals[3 * idx.normal_index + 2];
 					float tx = 0.0f;
 					float ty = 0.0f;
-
-					boundingBox.setMin(glm::min(boundingBox.getMin(), glm::vec3(vx, vy, vz)));
-					boundingBox.setMax(glm::max(boundingBox.getMax(), glm::vec3(vx, vy, vz)));
 
 					if (idx.texcoord_index != -1) {
 
