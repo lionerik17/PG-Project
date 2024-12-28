@@ -137,8 +137,43 @@ void processMovement()
 	std::cout << airplane.getSpeed() << "\n";
 
 	if (pressedKeys[GLFW_KEY_W]) {
-		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
 		airplane.moveForward(true);
+		newPosition = myCamera.getPosition();
+		if (newPosition.y < ground.y) {
+			currentPosition.y += 0.1f;
+			myCamera.setPosition(currentPosition);
+		}
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
+		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+	else if (pressedKeys[GLFW_KEY_S]) {
+		airplane.moveBackward(true);
+		newPosition = myCamera.getPosition();
+		if (newPosition.y < ground.y) {
+			currentPosition.y += 0.1f;
+			myCamera.setPosition(currentPosition);
+		}
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
+		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+	else {
+		airplane.moveForward(false);
+	}
+
+	if (pressedKeys[GLFW_KEY_A]) {
+		airplane.turnLeft();
+		newPosition = myCamera.getPosition();
+		if (newPosition.y < ground.y) {
+			currentPosition.y += 0.1f;
+			myCamera.setPosition(currentPosition);
+		}
+		view = myCamera.getViewMatrix();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
+		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+	else if (pressedKeys[GLFW_KEY_D]) {
+		airplane.turnRight();
 		newPosition = myCamera.getPosition();
 		if (newPosition.y < ground.y) {
 			currentPosition.y += 0.1f;
@@ -150,48 +185,9 @@ void processMovement()
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 	}
 	else {
-		airplane.moveForward(false);
+		airplane.levelRoll();
 	}
-
-	if (pressedKeys[GLFW_KEY_S]) {
-		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
-		airplane.moveBackward(airplaneSpeed);
-		newPosition = myCamera.getPosition();
-		if (newPosition.y < ground.y) {
-			currentPosition.y += 0.1f;
-			myCamera.setPosition(currentPosition);
-		}
-		view = myCamera.getViewMatrix();
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
-		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-	}
-
-	if (pressedKeys[GLFW_KEY_A]) {
-		myCamera.move(gps::MOVE_LEFT, cameraSpeed);
-		newPosition = myCamera.getPosition();
-		if (newPosition.y < ground.y) {
-			currentPosition.y += 0.1f;
-			myCamera.setPosition(currentPosition);
-		}
-		view = myCamera.getViewMatrix();
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
-		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-	}
-
-	if (pressedKeys[GLFW_KEY_D]) {
-		myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
-		newPosition = myCamera.getPosition();
-		if (newPosition.y < ground.y) {
-			currentPosition.y += 0.1f;
-			myCamera.setPosition(currentPosition);
-		}
-		view = myCamera.getViewMatrix();
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		normalMatrix = glm::mat3(glm::inverseTranspose(view * airplaneModelMatrix));
-		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-	}
+	
 
 	if (pressedKeys[GLFW_KEY_UP]) {
 		myCamera.rotate(cameraSpeed, 0.0f);
@@ -373,6 +369,7 @@ int main(int argc, const char* argv[]) {
 	initObjects();
 	initShaders();
 	initUniforms();
+	updateCameraPosition();
 
 	while (!glfwWindowShouldClose(glWindow)) {
 		airplane.applyGravity();
