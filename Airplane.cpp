@@ -36,7 +36,6 @@ private:
 
     void applyDrag() {
         speed *= drag;
-
         velocity.x *= drag;
         velocity.z *= drag;
     }
@@ -87,6 +86,7 @@ public:
 
     void turnLeft() {
         roll += bankingSpeed * deltaTime;
+        if (roll > maxBankingAngle) roll = maxBankingAngle;
 
         yaw -= bankingSpeed * deltaTime;
         updateOrientation();
@@ -95,6 +95,7 @@ public:
 
     void turnRight() {
         roll -= bankingSpeed * deltaTime;
+        if (roll > maxBankingAngle) roll = maxBankingAngle;
 
         yaw += bankingSpeed * deltaTime;
         updateOrientation();
